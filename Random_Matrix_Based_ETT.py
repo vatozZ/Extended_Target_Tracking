@@ -103,9 +103,10 @@ def plot_filter(xk, Xk,  Zk, i):
     circle_obj = plt.Circle((ground_truth_matrix[i][1], ground_truth_matrix[i][2]), radius, fill=False, label='GT')
     axis.add_artist(circle_obj)
     
-    #sensor location
+    #sensör konumu
     plt.scatter(sensor_location[0], sensor_location[1], color='red', marker='o', s=100)
-    
+
+    #legend için özellikler
     blue_patch = mpatches.Patch(color='blue', label='Xk')
     black_patch = mpatches.Patch(color='black', label='GT')
     green_patch = mpatches.Patch(color='green', label='Zk')
@@ -115,10 +116,10 @@ def plot_filter(xk, Xk,  Zk, i):
     plt.xlabel('X [m]')
     plt.ylabel('Y [m]')
 
-    #plt.pause(1)
+    #plt.pause(1) 
 
 def get_Zk(n_sim):
-
+    # Zk ölçüm kümesinin içerisinden o anki ölçüm indislerini çeker.
     meas_X, meas_Y = [], []
 
     for i in range(measurement_matrix.shape[0]):
@@ -138,18 +139,19 @@ def main():
         if i == 0:
             print("pas")
             continue
-        #get mesurements
+
+        #ölçüm al
         ZK = get_Zk(n_sim=i)
         
-        #get centroid of the measurements, and scattering matrix of the measurements
+        #ölçümlerin merkezlerini ve karşılık gelen saçılma matrislerini al  
         zk, Zk, nk = calculate_mean_and_covariance(Zk=ZK)  
 
-        # PREDICTION ###
+        # PREDICTION ## TAHMİN ADIMI #
         xk, Pk, vk, Xk = predict_ETT(xk=xk, Pk=Pk, vk=vk, Xk=Xk)
 
-        # UPDATE ####
+        # UPDATE # FİLTRE GÜNCELLEMESİ ADIMI###
         xk, Pk, Xk, vk = update_ETT(xk=xk, Pk=Pk, vk=vk, Xk=Xk, zk=zk, Zk=Zk, nk=nk)
-
+        
         plot_filter(xk, Xk, ZK, i)
         
 
@@ -177,7 +179,7 @@ if __name__ == "__main__":
 
     Pk_init = np.diag([std_pose, std_velocity, std_acceleration])
 
-    Id = np.eye(d) #(2, 2)
+    Id = np.eye(d) #(2, 2) 
     Is = np.eye(s) #(3, 3)
 
     Fk = array([[1., T, T**2/2], 
