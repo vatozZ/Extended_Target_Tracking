@@ -1,3 +1,8 @@
+"""
+Measurement Model mainly inherited from -Kumru-[1] (MATLAB code).
+[1] https://github.com/Metu-Sensor-Fusion-Lab/Extended-Target-Tracking-Using-Gaussian-Processes
+"""
+
 import math
 import numpy as np
 from math import pi, cos, sin 
