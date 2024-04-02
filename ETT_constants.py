@@ -15,7 +15,7 @@ target_initial_position = np.array([10., 10])
 #hedef çember 
 radius = 4.0
 
-#sensor location
+#sensör pozisyonu
 sensor_location = [0.0, 0.0]
 
 #örnekleme zamanı
@@ -27,16 +27,15 @@ select_random_theta = False
 #ölçüm gürültüsü
 stdMeas = 0.0
 
-#theta maneuver correlation constant
+# manevra ilişki sabiti
 theta_maneuver = 0.1
 
-#ivmelenme genişliği
+#ivmelenme süresi (genişliği)
 accel_width = 0.1
 
-#zamansal bozunma sabiti. tao = inf -> hedef statik
+#zamansal bozunma sabiti. tao = sonsuz -> hedef statik kabul edilir.
 tao = 100 #100 adımda sistemin ömrü yaklaşık 0.3679'a düşüyor. Sistem zamanla bozuluyor.
 
-#plot xlim ylim ayarları
-
+#çizim için limit ayarları 
 xlim = [-5., 40]
 ylim = [-15, 25]
