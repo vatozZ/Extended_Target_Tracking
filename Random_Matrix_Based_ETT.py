@@ -1,3 +1,15 @@
+"""
+Genişletilmiş Hedef Takibi için farklı ölçüm senaryoları için Python uygulama kodları. 
+Denklemler konusunda referans bkz. [1]
+
+Extended Target Tracking Python scripts under different scenarios. 
+For the reference of the equations: [1].
+
+[1] W. Koch, "On Bayesian Tracking of Extended Objects," 2006 IEEE International Conference on Multisensor Fusion and Integration for Intelligent Systems, Heidelberg, Germany, 2006, pp. 209-216, doi: 10.1109/MFI.2006.265585.
+keywords: {Bayesian methods;Radar tracking;Target tracking;Sensor fusion;Radar scattering;Object detection;Surveillance;Weapons;Robot sensing systems;Airborne radar},
+
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 from Measurement_Model import generate_measurement_2D
