@@ -1,15 +1,3 @@
-"""
-Genişletilmiş Hedef Takibi için farklı ölçüm senaryoları için Python uygulama kodları. 
-Denklemler konusunda referans bkz. [1]
-
-Extended Target Tracking Python scripts under different scenarios. 
-For the reference of the equations: [1].
-
-[1] W. Koch, "On Bayesian Tracking of Extended Objects," 2006 IEEE International Conference on Multisensor Fusion and Integration for Intelligent Systems, Heidelberg, Germany, 2006, pp. 209-216, doi: 10.1109/MFI.2006.265585.
-keywords: {Bayesian methods;Radar tracking;Target tracking;Sensor fusion;Radar scattering;Object detection;Surveillance;Weapons;Robot sensing systems;Airborne radar},
-
-"""
-
 import numpy as np
 import matplotlib.pyplot as plt
 from Measurement_Model import generate_measurement_2D
@@ -19,7 +7,7 @@ from numpy import matmul
 from numpy.linalg import pinv
 from numpy import kron
 import matplotlib.patches as mpatches
-
+import shapely.geometry as sg
 
 def predict_ETT(xk, Pk, vk, Xk):
 
@@ -115,10 +103,9 @@ def plot_filter(xk, Xk,  Zk, i):
     circle_obj = plt.Circle((ground_truth_matrix[i][1], ground_truth_matrix[i][2]), radius, fill=False, label='GT')
     axis.add_artist(circle_obj)
     
-    #sensör konumu
+    #sensor location
     plt.scatter(sensor_location[0], sensor_location[1], color='red', marker='o', s=100)
-
-    #legend için özellikler
+    
     blue_patch = mpatches.Patch(color='blue', label='Xk')
     black_patch = mpatches.Patch(color='black', label='GT')
     green_patch = mpatches.Patch(color='green', label='Zk')
@@ -128,10 +115,10 @@ def plot_filter(xk, Xk,  Zk, i):
     plt.xlabel('X [m]')
     plt.ylabel('Y [m]')
 
-    #plt.pause(1) 
+    #plt.pause(1)
 
 def get_Zk(n_sim):
-    # Zk ölçüm kümesinin içerisinden o anki ölçüm indislerini çeker.
+
     meas_X, meas_Y = [], []
 
     for i in range(measurement_matrix.shape[0]):
@@ -142,35 +129,80 @@ def get_Zk(n_sim):
     Zk = list(zip(meas_X, meas_Y))
 
     return Zk
-                    
+
+def calculate_error(xk, Xk, ZK, i):
+
+    eigenvalues, eigenvectors = np.linalg.eig(Xk)
+
+    px, py = xk[:2]
+
+    # Elipsin merkezini ve yarı eksen uzunluklarını hesapla
+    center = [px, py]
+    semi_axes_lengths = np.sqrt(eigenvalues)
+
+    # Elipsin çizim için theta değerlerini oluştur
+    theta = np.linspace(0, 2 * np.pi, 100)
+
+    # Elipsin x ve y koordinatlarını hesapla
+    ellipse_x = center[0] + semi_axes_lengths[0] * np.cos(theta) * eigenvectors[0, 0] + semi_axes_lengths[1] * np.sin(
+        theta) * eigenvectors[0, 1]
+    ellipse_y = center[1] + semi_axes_lengths[0] * np.cos(theta) * eigenvectors[1, 0] + semi_axes_lengths[1] * np.sin(
+        theta) * eigenvectors[1, 1]
+
+    #plt.plot(ellipse_x, ellipse_y, c='blue')
+
+    gt_circle = sg.Point(ground_truth_matrix[i][1], ground_truth_matrix[i][2]).buffer(radius)
+
+    #gt_circle = list(circle.exterior.coords)
+
+    extend = sg.Polygon(list([*zip(ellipse_x, ellipse_y)]))
+
+    intersection_of_union = gt_circle.intersection(extend).area
+
+    #plt.plot(extend.exterior.xy[0], extend.exterior.xy[1])
+
+    return intersection_of_union
+
 def main():
 
     xk, Pk, vk, Xk = xk_init, Pk_init, vk_init, Xk_init 
-    
-    for i in range(n_simulation):
-        if i == 0:
-            print("pas")
-            continue
 
-        #ölçüm al
+    simulate_samples = [1, 2, 3, 4, 5, 6]
+
+    IoU = [] #intersection of union  (Target Extent over Ground Truth)
+
+    for i in range(n_simulation):
+
+        #get mesurements
         ZK = get_Zk(n_sim=i)
         
-        #ölçümlerin merkezlerini ve karşılık gelen saçılma matrislerini al  
+        #get centroid of the measurements, and scattering matrix of the measurements
         zk, Zk, nk = calculate_mean_and_covariance(Zk=ZK)  
 
-        # PREDICTION ## TAHMİN ADIMI #
+        # PREDICTION ###
         xk, Pk, vk, Xk = predict_ETT(xk=xk, Pk=Pk, vk=vk, Xk=Xk)
 
-        # UPDATE # FİLTRE GÜNCELLEMESİ ADIMI###
+        # UPDATE ####
         xk, Pk, Xk, vk = update_ETT(xk=xk, Pk=Pk, vk=vk, Xk=Xk, zk=zk, Zk=Zk, nk=nk)
-        
-        plot_filter(xk, Xk, ZK, i)
-        
+
+        intersection_of_union = calculate_error(xk, Xk, ZK, i)
+
+        IoU.append(intersection_of_union)
+
+        if i in simulate_samples:
+            plot_filter(xk, Xk, ZK, i)
+
 
     plt.xlim(xlim)
     plt.ylim(ylim)
 
-    plt.savefig('ETT_Contour_Measurement.png', dpi=1200, bbox_inches='tight')
+    #plt.savefig('ETT_Contour_Measurement.png', dpi=1200, bbox_inches='tight')
+    plt.show()
+
+    plt.figure()
+    plt.title('Intersection of Union')
+    plt.plot(IoU)
+    plt.ylabel('Meter Square')
     plt.show()
 
 if __name__ == "__main__":
@@ -191,7 +223,7 @@ if __name__ == "__main__":
 
     Pk_init = np.diag([std_pose, std_velocity, std_acceleration])
 
-    Id = np.eye(d) #(2, 2) 
+    Id = np.eye(d) #(2, 2)
     Is = np.eye(s) #(3, 3)
 
     Fk = array([[1., T, T**2/2], 
