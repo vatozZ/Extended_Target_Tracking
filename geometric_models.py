@@ -58,8 +58,8 @@ while num_samples_taken < total_samples:
     y = uniform(-b, b)
 
     if ellips_control(x, y):
-        x_ellips.append(int(x))
-        y_ellips.append(int(y))
+        x_ellips.append(x)
+        y_ellips.append(y)
         num_samples_taken += 1
 
     else:
