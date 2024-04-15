@@ -78,27 +78,27 @@ def plot_filter(xk, Xk,  Zk, i):
     # Matrisin özdeğerlerini ve özvektörlerini bul
     eigenvalues, eigenvectors = np.linalg.eig(Xk)
 
-    # Elipsin merkezini ve yarı eksen uzunluklarını hesapla
+    # çemberin merkezini ve yarı eksen uzunluklarını hesapla
     center = [px, py]
     semi_axes_lengths = np.sqrt(eigenvalues)
 
-    # Elipsin çizim için theta değerlerini oluştur
+    # çemberin çizim için theta değerlerini oluştur
     theta = np.linspace(0, 2*np.pi, 100)
 
-    # Elipsin x ve y koordinatlarını hesapla
-    ellipse_x = center[0] + semi_axes_lengths[0] * np.cos(theta) * eigenvectors[0, 0] + semi_axes_lengths[1] * np.sin(theta) * eigenvectors[0, 1]
-    ellipse_y = center[1] + semi_axes_lengths[0] * np.cos(theta) * eigenvectors[1, 0] + semi_axes_lengths[1] * np.sin(theta) * eigenvectors[1, 1]
+    # çemberin x ve y koordinatlarını hesapla
+    circle_x = center[0] + semi_axes_lengths[0] * np.cos(theta) * eigenvectors[0, 0] + semi_axes_lengths[1] * np.sin(theta) * eigenvectors[0, 1]
+    circle_y = center[1] + semi_axes_lengths[0] * np.cos(theta) * eigenvectors[1, 0] + semi_axes_lengths[1] * np.sin(theta) * eigenvectors[1, 1]
 
-    # Elipsi çizdir
-    plt.plot(ellipse_x, ellipse_y, c='blue')
-    # Elips merkezini işaretle
+    # çemberi çizdir
+    plt.plot(circle_x, circle_y, c='blue')
+    # çember merkezini işaretle
     plt.scatter(center[0], center[1], color='blue', marker='x')
     # Ölçümleri çizdir
     for j in Zk:
         plt.scatter(j[0], j[1], c='green', marker='o')
     #Ground Truth çizdir
     plt.scatter(ground_truth_matrix[i][1], ground_truth_matrix[i][2], marker='x', color='black')
-    #Ground truth elipsi
+    #Ground truth çemberi
     axis = plt.gca()
     circle_obj = plt.Circle((ground_truth_matrix[i][1], ground_truth_matrix[i][2]), radius, fill=False, label='GT')
     axis.add_artist(circle_obj)
@@ -136,26 +136,26 @@ def calculate_error(xk, Xk, ZK, i):
 
     px, py = xk[:2]
 
-    # Elipsin merkezini ve yarı eksen uzunluklarını hesapla
+    # çemberin merkezini ve yarı eksen uzunluklarını hesapla
     center = [px, py]
     semi_axes_lengths = np.sqrt(eigenvalues)
 
-    # Elipsin çizim için theta değerlerini oluştur
+    # çemberin çizim için theta değerlerini oluştur
     theta = np.linspace(0, 2 * np.pi, 100)
 
-    # Elipsin x ve y koordinatlarını hesapla
-    ellipse_x = center[0] + semi_axes_lengths[0] * np.cos(theta) * eigenvectors[0, 0] + semi_axes_lengths[1] * np.sin(
+    # çemberin x ve y koordinatlarını hesapla
+    circle_x = center[0] + semi_axes_lengths[0] * np.cos(theta) * eigenvectors[0, 0] + semi_axes_lengths[1] * np.sin(
         theta) * eigenvectors[0, 1]
-    ellipse_y = center[1] + semi_axes_lengths[0] * np.cos(theta) * eigenvectors[1, 0] + semi_axes_lengths[1] * np.sin(
+    circle_y = center[1] + semi_axes_lengths[0] * np.cos(theta) * eigenvectors[1, 0] + semi_axes_lengths[1] * np.sin(
         theta) * eigenvectors[1, 1]
 
-    #plt.plot(ellipse_x, ellipse_y, c='blue')
+    #plt.plot(circle_x, circle_y, c='blue')
 
     gt_circle = sg.Point(ground_truth_matrix[i][1], ground_truth_matrix[i][2]).buffer(radius)
 
     #gt_circle = list(circle.exterior.coords)
 
-    extend = sg.Polygon(list([*zip(ellipse_x, ellipse_y)]))
+    extend = sg.Polygon(list([*zip(circle_x, circle_y)]))
 
     intersection_of_union = gt_circle.intersection(extend).area
 
